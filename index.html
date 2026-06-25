@@ -1,199 +1,997 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sorry in Every Language</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield | National Cybercrime Reporting Portal</title>
+    <style>
+        :root {
+            --primary: #0a1f3f;
+            --primary-light: #0f2d5c;
+            --accent: #c9a84c;
+            --accent-hover: #b8942f;
+            --danger: #c0392b;
+            --danger-light: #e74c3c;
+            --success: #1a7a3a;
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --text-light: #5a5a7a;
+            --border: #dce3ea;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --transition: 0.25s ease;
+        }
 
-    body {
-      background: #0a0a0f;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: sans-serif;
-      overflow: hidden;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    #canvas {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .particle {
-      position: absolute;
-      pointer-events: none;
-      font-weight: 500;
-      white-space: nowrap;
-      animation: floatUp linear forwards;
-      opacity: 0;
-    }
+        /* ─── TOP BAR ─────────────────────────── */
+        .top-bar {
+            background: #050d1a;
+            color: #aab4c0;
+            font-size: 0.8rem;
+            padding: 6px 0;
+            text-align: center;
+            letter-spacing: 0.4px;
+        }
+        .top-bar span {
+            color: var(--accent);
+            font-weight: 600;
+        }
 
-    @keyframes floatUp {
-      0%   { opacity: 0; transform: translateY(0) scale(0.7); }
-      15%  { opacity: 1; transform: translateY(-30px) scale(1); }
-      75%  { opacity: 0.9; }
-      100% { opacity: 0; transform: translateY(-300px) scale(0.85); }
-    }
+        /* ─── HEADER / NAV ───────────────────── */
+        .header {
+            background: var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+        }
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            flex-wrap: wrap;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .logo-text h1 {
+            font-size: 1.3rem;
+            color: #fff;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+        .logo-text small {
+            color: #8fa4c4;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: #cdd6e4;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .nav-links a.report-btn {
+            background: var(--danger-light);
+            color: #fff;
+            font-weight: 700;
+            padding: 9px 20px;
+            border-radius: 25px;
+            animation: pulse-btn 2.2s infinite;
+        }
+        .nav-links a.report-btn:hover {
+            background: var(--danger);
+            animation: none;
+        }
+        @keyframes pulse-btn {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(231, 76, 60, 0);
+            }
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
 
-    #center-sorry {
-      font-size: 72px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 4px;
-      text-align: center;
-      z-index: 10;
-      position: relative;
-      animation: pulse 2s ease-in-out infinite;
-      text-shadow: 0 0 60px rgba(180,120,255,0.6), 0 0 20px rgba(180,120,255,0.4);
-      transition: opacity 0.4s;
-    }
+        /* ─── MAIN CONTENT ──────────────────── */
+        .main-content {
+            flex: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
+            width: 100%;
+        }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); text-shadow: 0 0 60px rgba(180,120,255,0.6); }
-      50%       { transform: scale(1.06); text-shadow: 0 0 90px rgba(180,120,255,0.9), 0 0 30px rgba(120,200,255,0.5); }
-    }
+        /* ─── HERO ──────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, #0a1f3f 0%, #132e55 50%, #0f2440 100%);
+            border-radius: var(--radius);
+            padding: 40px 36px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 220px;
+            height: 220px;
+            border: 3px solid rgba(201, 168, 76, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-text {
+            flex: 1;
+            min-width: 260px;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-text h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        .hero-text h2 span {
+            color: var(--accent);
+        }
+        .hero-text p {
+            color: #bcc9db;
+            font-size: 1rem;
+            margin-bottom: 18px;
+            max-width: 500px;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-stat {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            text-align: center;
+            min-width: 100px;
+        }
+        .hero-stat .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .hero-stat .lbl {
+            font-size: 0.75rem;
+            color: #9aafca;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-    #sub {
-      font-size: 15px;
-      color: rgba(255,255,255,0.35);
-      text-align: center;
-      z-index: 10;
-      position: relative;
-      margin-top: 12px;
-      letter-spacing: 3px;
-    }
+        /* ─── SECTION TITLES ───────────────── */
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
 
-    #lang-ticker {
-      font-size: 18px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.7);
-      text-align: center;
-      z-index: 10;
-      position: relative;
-      margin-top: 20px;
-      min-height: 28px;
-      transition: opacity 0.3s;
-    }
-  </style>
+        /* ─── GRID LAYOUT ──────────────────── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* ─── CARDS ────────────────────────── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .card-header {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .icon-blue {
+            background: #e8f0fe;
+            color: #1a56db;
+        }
+        .icon-red {
+            background: #fde8e8;
+            color: #c0392b;
+        }
+        .icon-green {
+            background: #e6f4ea;
+            color: #1a7a3a;
+        }
+        .icon-gold {
+            background: #fef9e7;
+            color: #b8942f;
+        }
+
+        /* ─── FORM STYLES ──────────────────── */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: var(--text);
+            letter-spacing: 0.2px;
+        }
+        .form-group label .req {
+            color: var(--danger-light);
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(15, 45, 92, 0.08);
+            background: #fff;
+        }
+        .form-group textarea {
+            min-height: 100px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: var(--transition);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--danger-light);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(231, 76, 60, 0.35);
+        }
+        .btn-primary:hover {
+            background: #c0392b;
+            box-shadow: 0 6px 20px rgba(192, 57, 43, 0.45);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary-light);
+            background: #f8fafc;
+        }
+        .btn-sm {
+            padding: 8px 18px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+        }
+
+        /* ─── TRACKING ─────────────────────── */
+        .track-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .track-box input {
+            flex: 1;
+            min-width: 180px;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        .track-box input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(15, 45, 92, 0.06);
+        }
+        .track-result {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .track-result.success {
+            background: #e6f4ea;
+            color: #1a5c2a;
+            border: 1px solid #b7dfc4;
+            display: block;
+        }
+        .track-result.error {
+            background: #fde8e8;
+            color: #8b1a1a;
+            border: 1px solid #f5c6c6;
+            display: block;
+        }
+
+        /* ─── RESOURCE CARDS ──────────────── */
+        .resource-card {
+            text-align: center;
+            padding: 20px 16px;
+        }
+        .resource-card .icon-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        /* ─── MODAL ────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal .check-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        .modal h3 {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+        .modal .ref-id {
+            background: #f0f4f8;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+        .modal button {
+            margin-top: 14px;
+        }
+
+        /* ─── FOOTER ───────────────────────── */
+        .footer {
+            background: var(--primary);
+            color: #b0c0d8;
+            text-align: center;
+            padding: 18px 20px;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+        }
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ─── RESPONSIVE ──────────────────── */
+        @media (max-width: 900px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                padding: 28px 20px;
+                text-align: center;
+                justify-content: center;
+            }
+            .hero-text h2 {
+                font-size: 1.5rem;
+            }
+            .hero-stats {
+                justify-content: center;
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--primary-light);
+                border-radius: var(--radius-sm);
+                margin-top: 10px;
+                padding: 8px 0;
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .nav-links a {
+                padding: 12px 20px;
+                border-radius: 0;
+            }
+            .hamburger {
+                display: block;
+            }
+        }
+        @media (max-width: 500px) {
+            .hero-stat {
+                min-width: 70px;
+                padding: 10px 12px;
+            }
+            .hero-stat .num {
+                font-size: 1.4rem;
+            }
+            .nav-container {
+                padding: 10px 14px;
+            }
+            .logo-text h1 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="canvas">
-    <div id="center-sorry">SORRY</div>
-    <div id="sub">sorry &middot; sorry &middot; sorry &middot; sorry &middot; sorry</div>
-    <div id="lang-ticker"></div>
-  </div>
 
-  <script>
-    const sorries = [
-      { word: "Sorry",           lang: "English" },
-      { word: "Lo siento",       lang: "Spanish" },
-      { word: "Désolé",          lang: "French" },
-      { word: "Es tut mir leid", lang: "German" },
-      { word: "Mi dispiace",     lang: "Italian" },
-      { word: "Desculpe",        lang: "Portuguese" },
-      { word: "Извините",        lang: "Russian" },
-      { word: "对不起",            lang: "Chinese" },
-      { word: "ごめんなさい",       lang: "Japanese" },
-      { word: "미안합니다",         lang: "Korean" },
-      { word: "مَعْذِرَة",         lang: "Arabic" },
-      { word: "क्षमा करें",        lang: "Hindi" },
-      { word: "Przepraszam",     lang: "Polish" },
-      { word: "Özür dilerim",    lang: "Turkish" },
-      { word: "متأسفم",           lang: "Persian" },
-      { word: "Maaf",            lang: "Indonesian" },
-      { word: "Xin lỗi",         lang: "Vietnamese" },
-      { word: "Beklager",        lang: "Norwegian" },
-      { word: "Förlåt",          lang: "Swedish" },
-      { word: "Anteeksi",        lang: "Finnish" },
-      { word: "Συγγνώμη",        lang: "Greek" },
-      { word: "Omlouvám se",     lang: "Czech" },
-      { word: "Sajnálom",        lang: "Hungarian" },
-      { word: "Iertați-mă",      lang: "Romanian" },
-      { word: "Pardon",          lang: "Dutch" },
-      { word: "Samahani",        lang: "Swahili" },
-      { word: "Mea culpa",       lang: "Latin" },
-      { word: "কষমা করবেন",       lang: "Bengali" },
-      { word: "ਮੁਆਫ਼ ਕਰੋ",         lang: "Punjabi" },
-      { word: "மன்னிக்கவும்",     lang: "Tamil" },
-      { word: "క్షమించండి",       lang: "Telugu" },
-      { word: "ക്ഷമിക്കണം",       lang: "Malayalam" },
-      { word: "ขอโทษ",            lang: "Thai" },
-      { word: "ຂໍໂທດ",             lang: "Lao" },
-      { word: "Ngiyaxolisa",     lang: "Zulu" },
-      { word: "Kafara",          lang: "Somali" },
-      { word: "Perdón",          lang: "Spanish (alt)" },
-      { word: "Scusa",           lang: "Italian (alt)" },
-      { word: "Atvainojiet",     lang: "Latvian" },
-      { word: "Atsiprašau",      lang: "Lithuanian" },
-    ];
+    <!-- ═══════════ TOP BAR ═══════════ -->
+    <div class="top-bar">
+        ⚠️ <span>OFFICIAL</span> National Cybercrime Reporting Portal &nbsp;|&nbsp;
+        24/7 Helpline: <span>1930</span> &nbsp;|&nbsp;
+        Report anonymously · Your identity is protected
+    </div>
 
-    const colors = [
-      "#b47fff","#7fd4ff","#ff7faa","#7fffb4","#ffd47f",
-      "#ff9f7f","#7fbfff","#c9ff7f","#ff7fd4","#7fffff",
-      "#ffb347","#47ffb3","#ff6699","#99ff66","#6699ff",
-    ];
+    <!-- ═══════════ HEADER ═══════════ -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo-area" onclick="scrollToTop()">
+                <div class="logo-icon">🛡️</div>
+                <div class="logo-text">
+                    <h1>CyberShield</h1>
+                    <small>National Cybercrime Portal</small>
+                </div>
+            </div>
+            <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active" onclick="closeMenu()">🏠 Home</a></li>
+                <li><a href="#report" onclick="closeMenu()">📝 Report Crime</a></li>
+                <li><a href="#track" onclick="closeMenu()">🔍 Track Complaint</a></li>
+                <li><a href="#resources" onclick="closeMenu()">📚 Resources</a></li>
+                <li><a href="#faq" onclick="closeMenu()">❓ FAQ</a></li>
+                <li><a href="#report" class="report-btn" onclick="closeMenu()">🚨 REPORT NOW</a></li>
+            </ul>
+        </div>
+    </header>
 
-    const canvas = document.getElementById('canvas');
-    const ticker = document.getElementById('lang-ticker');
-    let tickerIdx = 0;
+    <!-- ═══════════ MAIN ═══════════ -->
+    <main class="main-content">
 
-    function spawnParticle() {
-      const s = sorries[Math.floor(Math.random() * sorries.length)];
-      const el = document.createElement('div');
-      el.className = 'particle';
-      el.textContent = s.word;
-      const size = 13 + Math.random() * 24;
-      el.style.fontSize = size + 'px';
-      el.style.color = colors[Math.floor(Math.random() * colors.length)];
-      el.style.left = (Math.random() * 90 + 2) + '%';
-      el.style.bottom = (Math.random() * 35 + 5) + '%';
-      const dur = 2.5 + Math.random() * 3;
-      el.style.animationDuration = dur + 's';
-      el.style.animationDelay = (Math.random() * 0.4) + 's';
-      canvas.appendChild(el);
-      setTimeout(() => el.remove(), (dur + 0.8) * 1000);
-    }
+        <!-- ─── HERO ─── -->
+        <section class="hero" id="home">
+            <div class="hero-text">
+                <h2>Report <span>Cybercrime</span>.<br>Protect the Nation.</h2>
+                <p>If you are a victim of online fraud, hacking, identity theft, or any cyber offense, report it here. Your report helps law enforcement take swift action.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="num" id="statReports">148,932</div>
+                        <div class="lbl">Reports Filed</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num" id="statResolved">97,541</div>
+                        <div class="lbl">Cases Resolved</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num">₹ 2,847 Cr</div>
+                        <div class="lbl">Funds Saved</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    function rotateTicker() {
-      ticker.style.opacity = '0';
-      setTimeout(() => {
-        const s = sorries[tickerIdx % sorries.length];
-        ticker.textContent = s.word + ' — ' + s.lang;
-        ticker.style.opacity = '1';
-        tickerIdx++;
-      }, 300);
-    }
+        <!-- ─── REPORT FORM ─── -->
+        <section id="report">
+            <h2 class="section-title">File a Cybercrime Complaint</h2>
+            <div class="card" style="padding: 28px;">
+                <form id="complaintForm" onsubmit="handleSubmit(event)" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Full Name <span class="req">*</span></label>
+                            <input type="text" id="fullName" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="req">*</span></label>
+                            <input type="email" id="email" placeholder="your@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number <span class="req">*</span></label>
+                            <input type="tel" id="phone" placeholder="+91 98765 43210" required pattern="[0-9+\-\s]{10,15}">
+                        </div>
+                        <div class="form-group">
+                            <label for="crimeType">Type of Cybercrime <span class="req">*</span></label>
+                            <select id="crimeType" required>
+                                <option value="">-- Select --</option>
+                                <option value="financial-fraud">Financial / UPI Fraud</option>
+                                <option value="phishing">Phishing / Vishing</option>
+                                <option value="identity-theft">Identity Theft</option>
+                                <option value="hacking">Hacking / Unauthorized Access</option>
+                                <option value="cyberbullying">Cyberbullying / Harassment</option>
+                                <option value="ransomware">Ransomware Attack</option>
+                                <option value="online-scam">Online Shopping Scam</option>
+                                <option value="social-media">Social Media Impersonation</option>
+                                <option value="data-breach">Data Breach / Leak</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="incidentDate">Date of Incident <span class="req">*</span></label>
+                        <input type="date" id="incidentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Detailed Description <span class="req">*</span></label>
+                        <textarea id="description" placeholder="Describe what happened — include any suspicious links, emails, phone numbers, transaction IDs, or account details..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="evidence">Evidence / Screenshot URL (optional)</label>
+                        <input type="url" id="evidence" placeholder="https://drive.google.com/... or any link to evidence">
+                    </div>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                        <button type="submit" class="btn btn-primary">🚨 Submit Complaint</button>
+                        <button type="reset" class="btn btn-outline">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-    setInterval(spawnParticle, 220);
-    rotateTicker();
-    setInterval(rotateTicker, 1500);
+        <!-- ─── TRACK COMPLAINT ─── -->
+        <section id="track" style="margin-top:28px;">
+            <h2 class="section-title">Track Your Complaint</h2>
+            <div class="card">
+                <p style="margin-bottom:12px;color:var(--text-light);">Enter the <strong>Reference ID</strong> you received after filing your complaint.</p>
+                <div class="track-box">
+                    <input type="text" id="trackInput" placeholder="e.g. CS-2026-AB7X9K" maxlength="20">
+                    <button class="btn btn-primary btn-sm" onclick="trackComplaint()">🔍 Track Status</button>
+                </div>
+                <div class="track-result" id="trackResult"></div>
+            </div>
+        </section>
 
-    const mainWords = [
-      "SORRY", "对不起", "ごめんなさい", "DÉSOLÉ",
-      "LO SIENTO", "SCUSA", "PARDON", "ИЗВИНИТЕ",
-      "क्षमा", "미안해요", "SORRY"
-    ];
-    let mIdx = 0;
-    const centerEl = document.getElementById('center-sorry');
+        <!-- ─── RESOURCES ─── -->
+        <section id="resources" style="margin-top:28px;">
+            <h2 class="section-title">Cyber Safety Resources</h2>
+            <div class="grid-3">
+                <div class="card resource-card">
+                    <div class="icon-circle icon-blue">🔒</div>
+                    <h4>Stay Safe Online</h4>
+                    <p style="font-size:0.85rem;color:var(--text-light);">Learn how to protect your accounts with strong passwords and 2FA.</p>
+                </div>
+                <div class="card resource-card">
+                    <div class="icon-circle icon-red">🎣</div>
+                    <h4>Spot Phishing</h4>
+                    <p style="font-size:0.85rem;color:var(--text-light);">Identify fake emails, SMS, and websites before you click.</p>
+                </div>
+                <div class="card resource-card">
+                    <div class="icon-circle icon-green">🛡️</div>
+                    <h4>Report & Recover</h4>
+                    <p style="font-size:0.85rem;color:var(--text-light);">Step-by-step guide to reporting and recovering lost funds.</p>
+                </div>
+            </div>
+        </section>
 
-    setInterval(() => {
-      centerEl.style.opacity = '0';
-      setTimeout(() => {
-        mIdx = (mIdx + 1) % mainWords.length;
-        centerEl.textContent = mainWords[mIdx];
-        centerEl.style.opacity = '1';
-      }, 400);
-    }, 2200);
-  </script>
+        <!-- ─── FAQ ─── -->
+        <section id="faq" style="margin-top:28px;">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">❓ Is my identity kept confidential?</div>
+                    <p style="font-size:0.9rem;color:var(--text-light);">Yes. You can report anonymously. Your personal details are encrypted and shared only with authorized investigators.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">❓ What happens after I file a complaint?</div>
+                    <p style="font-size:0.9rem;color:var(--text-light);">Your complaint is assigned a unique Reference ID. The cybercrime unit reviews it and may contact you for further details within 48 hours.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">❓ Can I report on behalf of someone else?</div>
+                    <p style="font-size:0.9rem;color:var(--text-light);">Yes. You can file a complaint as a witness or on behalf of a family member. Provide their details in the description.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">❓ Is there a time limit to report?</div>
+                    <p style="font-size:0.9rem;color:var(--text-light);">Report as soon as possible. For financial fraud, immediate reporting (within 1 hour) increases the chance of fund recovery.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="footer">
+        <p>© 2026 <strong>CyberShield</strong> — National Cybercrime Reporting Portal &nbsp;|&nbsp;
+            Helpline: <a href="tel:1930">1930</a> &nbsp;|&nbsp;
+            <a href="#">Privacy Policy</a> &nbsp;|&nbsp;
+            <a href="#">Terms of Service</a>
+        </p>
+        <p style="margin-top:4px;font-size:0.75rem;">This is a demonstration portal. For real emergencies, dial 1930 or visit your nearest cyber cell.</p>
+    </footer>
+
+    <!-- ═══════════ MODAL (Hidden) ═══════════ -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;">
+        <div class="modal">
+            <div class="check-icon">✅</div>
+            <h3>Complaint Filed Successfully!</h3>
+            <p>Your complaint has been registered. Save this Reference ID for future tracking:</p>
+            <div class="ref-id" id="modalRefId">CS-2026-XXXXXX</div>
+            <p style="font-size:0.8rem;color:var(--text-light);">We have also sent a confirmation to your email.</p>
+            <button class="btn btn-primary" onclick="closeModal()">Got It</button>
+        </div>
+    </div>
+
+    <!-- ═══════════ SCRIPTS ═══════════ -->
+    <script>
+        // ── Store complaints in memory (simulated database) ──
+        const complaintsDB = {};
+
+        // ── Generate unique Reference ID ──
+        function generateRefID() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let random = '';
+            for (let i = 0; i < 6; i++) {
+                random += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const year = new Date().getFullYear();
+            return `CS-${year}-${random}`;
+        }
+
+        // ── Handle form submission ──
+        function handleSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('complaintForm');
+
+            // Basic HTML5 validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                // Highlight first invalid field
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) firstInvalid.focus();
+                return;
+            }
+
+            // Gather data
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const crimeType = document.getElementById('crimeType').value;
+            const incidentDate = document.getElementById('incidentDate').value;
+            const description = document.getElementById('description').value.trim();
+            const evidence = document.getElementById('evidence').value.trim();
+
+            const refID = generateRefID();
+            const now = new Date().toISOString();
+
+            // Store complaint
+            complaintsDB[refID] = {
+                refID,
+                fullName,
+                email,
+                phone,
+                crimeType,
+                incidentDate,
+                description,
+                evidence,
+                status: 'Under Review',
+                filedAt: now,
+                updates: ['Complaint registered successfully.']
+            };
+
+            // Show modal
+            document.getElementById('modalRefId').textContent = refID;
+            document.getElementById('modalOverlay').style.display = 'flex';
+
+            // Reset form
+            form.reset();
+
+            // Update stats counter
+            updateStats();
+
+            // Scroll to modal
+            document.getElementById('modalOverlay').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ── Close modal ──
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            // Scroll to tracking section
+            document.getElementById('track').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ── Track complaint ──
+        function trackComplaint() {
+            const input = document.getElementById('trackInput').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('trackResult');
+
+            if (!input) {
+                resultDiv.className = 'track-result error';
+                resultDiv.textContent = '⚠️ Please enter a Reference ID.';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            const complaint = complaintsDB[input];
+            if (complaint) {
+                resultDiv.className = 'track-result success';
+                resultDiv.innerHTML = `
+                            ✅ <strong>Status:</strong> ${complaint.status}<br>
+                            📅 <strong>Filed:</strong> ${new Date(complaint.filedAt).toLocaleDateString('en-IN', {day:'numeric', month:'long', year:'numeric'})}<br>
+                            📋 <strong>Type:</strong> ${complaint.crimeType.replace(/-/g,' ')}<br>
+                            📝 <strong>Latest Update:</strong> ${complaint.updates[complaint.updates.length-1]}
+                        `;
+            } else {
+                resultDiv.className = 'track-result error';
+                resultDiv.textContent = '❌ No complaint found with that Reference ID. Please double-check and try again.';
+            }
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ── Update stats counter ──
+        function updateStats() {
+            const totalReports = Object.keys(complaintsDB).length;
+            const baseReports = 148932;
+            const newTotal = baseReports + totalReports;
+            document.getElementById('statReports').textContent = newTotal.toLocaleString('en-IN');
+            document.getElementById('statResolved').textContent = (97541 + Math.floor(totalReports * 0.65))
+                .toLocaleString('en-IN');
+        }
+
+        // ── Mobile menu toggle ──
+        function toggleMenu() {
+            const nav = document.getElementById('navLinks');
+            nav.classList.toggle('open');
+        }
+
+        function closeMenu() {
+            document.getElementById('navLinks').classList.remove('open');
+        }
+
+        // ── Scroll to top (logo click) ──
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMenu();
+        }
+
+        // ── Smooth scroll for nav links ──
+        document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href === '#home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    closeMenu();
+                    return;
+                }
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    closeMenu();
+                    // Update active class
+                    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove(
+                        'active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // ── Set default date to today ──
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('incidentDate');
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.setAttribute('max', today);
+                dateInput.value = today;
+            }
+
+            // Pre-seed some demo complaints for tracking demo
+            const demoID = 'CS-2026-DEMO01';
+            complaintsDB[demoID] = {
+                refID: demoID,
+                fullName: 'Demo User',
+                email: 'demo@example.com',
+                phone: '+91 9876543210',
+                crimeType: 'financial-fraud',
+                incidentDate: '2026-06-20',
+                description: 'Unauthorized UPI transaction of ₹25,000.',
+                evidence: '',
+                status: 'Investigation in Progress',
+                filedAt: '2026-06-20T10:30:00Z',
+                updates: ['Complaint registered.', 'Assigned to Cyber Cell Officer.', 'Investigation in Progress.']
+            };
+
+            // Update stats
+            updateStats();
+        });
+
+        // ── Close modal on overlay click ──
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ── Keyboard: Escape closes modal ──
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay.style.display === 'flex') closeModal();
+            }
+        });
+
+        // ── Track on Enter key ──
+        document.getElementById('trackInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') trackComplaint();
+        });
+
+        console.log('🛡️ CyberShield Portal Ready. Demo Tracking ID: CS-2026-DEMO01');
+        console.log('📝 File a complaint to generate your own Reference ID.');
+    </script>
 </body>
 </html>
