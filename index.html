@@ -2,24 +2,232 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Good Morning, Prashu 🌸</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For Prashu</title>
-<meta name="description" content="A book of notes, poems and letters — for Prashu, from Sammu.">
-<link rel="stylesheet" href="assets/style.css">
+<style>
+  :root{
+    --blush: #ffe3ef;
+    --petal: #ffb6d0;
+    --rose: #ff8fb3;
+    --deep: #d9497a;
+    --cream: #fff7fa;
+    --gold: #ffd9a0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background: linear-gradient(160deg, var(--blush) 0%, var(--cream) 45%, var(--petal) 100%);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    overflow-x:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 16px;
+    position:relative;
+  }
+
+  /* floating hearts */
+  .heart{
+    position:fixed;
+    top:100%;
+    font-size: 22px;
+    opacity:0.8;
+    animation: floatUp linear infinite;
+    pointer-events:none;
+    user-select:none;
+  }
+  @keyframes floatUp{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0.9;}
+    100%{ transform: translateY(-110vh) rotate(360deg); opacity:0;}
+  }
+
+  .sun{
+    position:absolute;
+    top:-60px; right:-60px;
+    width:180px;height:180px;
+    background: radial-gradient(circle, var(--gold), transparent 70%);
+    border-radius:50%;
+    filter: blur(2px);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+  }
+
+  .card{
+    position:relative;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(14px);
+    border-radius: 28px;
+    padding: 48px 40px;
+    max-width: 520px;
+    width:100%;
+    text-align:center;
+    box-shadow: 0 20px 60px rgba(217,73,122,0.18);
+    border: 1px solid rgba(255,255,255,0.6);
+  }
+
+  .eyebrow{
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--deep);
+    opacity:0.75;
+    margin-bottom: 8px;
+    font-weight:600;
+  }
+
+  h1{
+    font-family: 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 52px;
+    margin: 0 0 6px;
+    color: var(--deep);
+    text-shadow: 0 2px 12px rgba(255,143,179,0.4);
+  }
+
+  .sub{
+    font-size:17px;
+    color:#a5405f;
+    margin-bottom: 26px;
+    line-height:1.6;
+  }
+
+  #message{
+    font-size:16px;
+    color:#7a2f47;
+    min-height: 70px;
+    margin: 20px 0 26px;
+    line-height:1.7;
+    font-style: italic;
+    transition: opacity .3s ease;
+  }
+
+  button{
+    background: linear-gradient(135deg, var(--rose), var(--deep));
+    border:none;
+    color:white;
+    padding: 14px 30px;
+    font-size: 15px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 10px 24px rgba(217,73,122,0.35);
+    transition: transform .15s ease, box-shadow .15s ease;
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+  button:hover{ transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 30px rgba(217,73,122,0.45); }
+  button:active{ transform: scale(0.97); }
+
+  .petals{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    border-radius:28px;
+  }
+
+  .count{
+    margin-top:18px;
+    font-size:12px;
+    color:#c06084;
+    opacity:0.8;
+  }
+
+  footer{
+    margin-top: 22px;
+    font-size: 13px;
+    color:#b25a78;
+    opacity:0.8;
+  }
+</style>
 </head>
 <body>
-<main class="cover">
-  <div class="marks">
-    <div class="note a"></div>
-    <div class="note b"></div>
-    <span class="heart">&#10084;</span>
-  </div>
-  <span class="eyebrow">a book of notes, poems &amp; letters</span>
-  <h1>For Prashu</h1>
-  <p class="tagline">Twenty small chapters about one Instagram message, one project that wasn't really about the project, and everything that happened after.</p>
-  <p class="byline">written by Sammu, for Prashi &middot; baby &middot; punti &middot; bauni &middot; Prashu</p>
-  <a class="cta" href="contents.html">Open the notebook &rarr;</a>
-  <p class="date">since June 6, 2025</p>
-</main>
+
+<div class="sun"></div>
+
+<div class="card">
+  <div class="petals" id="petals"></div>
+  <div class="eyebrow">A little something for you</div>
+  <h1>Good Morning, Prashu</h1>
+  <p class="sub">Before the day gets busy, here's a small pink corner of the internet just for you 🌷</p>
+
+  <div id="message">Tap the button and let's see what today's message is...</div>
+
+  <button onclick="newMessage()">Send me love ✨</button>
+  <div class="count" id="count"></div>
+
+  <footer>made with love, by your favorite person 💌</footer>
+</div>
+
+<script>
+const messages = [
+  "You make ordinary mornings feel like something worth waking up for.",
+  "Wherever you are today, know that someone is smiling just thinking about you.",
+  "Drink some water, eat something good, and be a little proud of yourself today.",
+  "You don't have to be 'on' today. Just be you — that's already enough.",
+  "I hope today is soft and kind to you, the way you are to everyone else.",
+  "Somewhere between yesterday and tomorrow, I just wanted to remind you: you're loved. A lot.",
+  "If today feels heavy, remember you've survived every hard day so far. You've got this.",
+  "You're the best part of my good mornings and my good nights.",
+  "Sending you sunshine, soft playlists, and a little extra courage for today.",
+  "No matter what today brings, you're doing better than you think you are."
+];
+
+let used = [];
+
+function newMessage(){
+  if(used.length === messages.length) used = [];
+  let idx;
+  do { idx = Math.floor(Math.random()*messages.length); } while(used.includes(idx));
+  used.push(idx);
+
+  const el = document.getElementById('message');
+  el.style.opacity = 0;
+  setTimeout(()=>{
+    el.textContent = messages[idx];
+    el.style.opacity = 1;
+  }, 200);
+
+  document.getElementById('count').textContent = `message ${used.length} of ${messages.length}`;
+  burstPetal();
+}
+
+function burstPetal(){
+  const petals = document.getElementById('petals');
+  for(let i=0;i<8;i++){
+    const p = document.createElement('div');
+    p.textContent = ['🌸','💗','✨'][Math.floor(Math.random()*3)];
+    p.style.position='absolute';
+    p.style.left = Math.random()*100+'%';
+    p.style.top = '50%';
+    p.style.fontSize = (14+Math.random()*10)+'px';
+    p.style.transition = 'all 1s ease-out';
+    p.style.opacity = '1';
+    petals.appendChild(p);
+    requestAnimationFrame(()=>{
+      p.style.transform = `translate(${(Math.random()-0.5)*200}px, ${-100-Math.random()*150}px) rotate(${Math.random()*360}deg)`;
+      p.style.opacity = '0';
+    });
+    setTimeout(()=>p.remove(), 1100);
+  }
+}
+
+// ambient floating hearts across whole page
+function spawnHeart(){
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = ['💗','🌸','💕','✨'][Math.floor(Math.random()*4)];
+  heart.style.left = Math.random()*100+'vw';
+  heart.style.animationDuration = (6+Math.random()*6)+'s';
+  heart.style.fontSize = (16+Math.random()*14)+'px';
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(), 13000);
+}
+setInterval(spawnHeart, 900);
+for(let i=0;i<5;i++) setTimeout(spawnHeart, i*300);
+</script>
+
 </body>
 </html>
