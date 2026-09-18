@@ -117,6 +117,11 @@
     color: var(--accent-gold);
     text-shadow: 0 0 10px rgba(253, 224, 71, 0.3);
   }
+  
+  .time-value.journey {
+    color: var(--accent-pink);
+    text-shadow: 0 0 10px rgba(244, 114, 182, 0.3);
+  }
 
   .time-label {
     font-size: 11px;
@@ -126,7 +131,6 @@
     margin-top: 4px;
   }
 
-  /* Laddoo Badge Styles */
   .laddoo-badge {
     display: inline-block;
     margin-top: 20px;
@@ -316,24 +320,24 @@
   <div class="hero-card">
     <div class="avatar-glow">👑</div>
     <h1>The Countdown is On</h1>
-    <p class="subtitle">Counting down to the exact second my favorite person turns 18.<br>March 13th at 7:00 PM 🎂</p>
+    <p class="subtitle">Counting down to the exact second my favorite person turns 18.<br>March 13th at 10:00 AM 🎂</p>
 
-    <!-- BIRTHDAY COUNTDOWN -->
+    <!-- 18TH BIRTHDAY COUNTDOWN -->
     <div class="timer-grid" id="timer-grid">
       <div class="time-unit">
-        <span class="time-value" id="days">000</span>
+        <span class="time-value" id="bday-days">000</span>
         <span class="time-label">Days</span>
       </div>
       <div class="time-unit">
-        <span class="time-value" id="hours">00</span>
+        <span class="time-value" id="bday-hours">00</span>
         <span class="time-label">Hours</span>
       </div>
       <div class="time-unit">
-        <span class="time-value" id="minutes">00</span>
+        <span class="time-value" id="bday-minutes">00</span>
         <span class="time-label">Mins</span>
       </div>
       <div class="time-unit">
-        <span class="time-value" id="seconds">00</span>
+        <span class="time-value" id="bday-seconds">00</span>
         <span class="time-label">Secs</span>
       </div>
     </div>
@@ -345,13 +349,38 @@
   </div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('notes')">🌙 Night Notes</button>
+    <button class="tab-btn active" onclick="switchTab('journey')">⏳ Our Journey</button>
+    <button class="tab-btn" onclick="switchTab('notes')">🌙 Notes</button>
     <button class="tab-btn" onclick="switchTab('reasons')">💖 18 Reasons</button>
     <button class="tab-btn" onclick="switchTab('memories')">📸 Memories</button>
-    <button class="tab-btn" onclick="switchTab('hugs')">✨ Love</button>
   </div>
 
-  <div id="notes" class="tab-content active">
+  <!-- OUR JOURNEY TAB (Counting UP since Jestha 23) -->
+  <div id="journey" class="tab-content active">
+    <h3 style="color: var(--accent-pink); text-align: center;">Together Since Jestha 23</h3>
+    <p style="color: var(--text-muted); font-size: 14px; text-align: center; margin-top: 8px;">Every single second since that day has been magic.</p>
+    
+    <div class="timer-grid" style="margin-top: 16px;">
+      <div class="time-unit">
+        <span class="time-value journey" id="journey-days">000</span>
+        <span class="time-label">Days</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-value journey" id="journey-hours">00</span>
+        <span class="time-label">Hours</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-value journey" id="journey-minutes">00</span>
+        <span class="time-label">Mins</span>
+      </div>
+      <div class="time-unit">
+        <span class="time-value journey" id="journey-seconds">00</span>
+        <span class="time-label">Secs</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="notes" class="tab-content">
     <h3 style="color: var(--accent-purple);">Tonight's Sweet Message</h3>
     <div class="display-box" id="note-box">
       Tap below whenever you need a reminder of how excited I am to see you step into this next chapter...
@@ -368,7 +397,7 @@
   </div>
 
   <div id="memories" class="tab-content">
-    <h3 style="color: var(--accent-gold); margin-bottom: 16px;">17 Years of Magic</h3>
+    <h3 style="color: var(--accent-gold); margin-bottom: 16px;">Our Magic</h3>
     <div class="gallery-grid">
       <div class="polaroid" style="--r: 0.2;">
         <div class="polaroid-img">💫</div>
@@ -379,25 +408,13 @@
         <div class="polaroid-caption">Birthday Anticipation</div>
       </div>
       <div class="polaroid" style="--r: 0.4;">
-        <div class="polaroid-img">🏖️</div>
-        <div class="polaroid-caption">Unforgettable Trips</div>
+        <div class="polaroid-img">🫂</div>
+        <div class="polaroid-caption">Warm Hugs</div>
       </div>
       <div class="polaroid" style="--r: 0.9;">
         <div class="polaroid-img">🍬</div>
         <div class="polaroid-caption">Sharing Laddoos</div>
       </div>
-    </div>
-  </div>
-
-  <div id="hugs" class="tab-content">
-    <h3 style="color: var(--accent-pink); margin-bottom: 12px;">Send Virtual Warmth</h3>
-    <p style="color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 20px;">
-      Because the birthday girl deserves endless affection. Send yourself some love right now!
-    </p>
-    
-    <div class="action-grid">
-      <button class="primary-btn" style="margin-top:0;" onclick="triggerParticles('💋')">Send Kisses 💋</button>
-      <button class="primary-btn" style="margin-top:0; background: linear-gradient(135deg, #a78bfa, #6366f1);" onclick="triggerParticles('🫂')">Big Hug 🫂</button>
     </div>
   </div>
 
@@ -408,15 +425,14 @@
 </div>
 
 <script>
-/* 1. EXACT BIRTHDAY COUNTDOWN ENGINE */
-function updateTimer() {
+/* 1. BIRTHDAY COUNTDOWN ENGINE (Counting Down to 10:00 AM) */
+function updateBdayTimer() {
   const now = new Date();
   
-  // Set target to upcoming March 13th at 19:00:00 (7:00 PM)
   let currentYear = now.getFullYear();
-  let targetDate = new Date(currentYear, 2, 13, 19, 0, 0); // Month 2 is March
+  // Target: March 13th at 10:00 AM (10:00:00)
+  let targetDate = new Date(currentYear, 2, 13, 10, 0, 0); 
   
-  // If we are past March 13, 7 PM this year, target next year
   if (now.getTime() > targetDate.getTime()) {
     targetDate.setFullYear(currentYear + 1);
   }
@@ -426,24 +442,49 @@ function updateTimer() {
   if (diff <= 0) {
     document.getElementById('timer-grid').style.display = 'none';
     document.getElementById('birthday-message').style.display = 'block';
-    triggerParticles('🎉');
-    triggerParticles('🎂');
   } else {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const seconds = Math.floor((diff / 1000) % 60);
 
-    document.getElementById('days').textContent = String(days).padStart(3, '0');
-    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    document.getElementById('bday-days').textContent = String(days).padStart(3, '0');
+    document.getElementById('bday-hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('bday-minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('bday-seconds').textContent = String(seconds).padStart(2, '0');
   }
 }
-setInterval(updateTimer, 1000);
-updateTimer();
 
-/* 2. TAB SWITCHER */
+/* 2. JOURNEY TIMER ENGINE (Counting Up since Jestha 23 / June 6, 2025) */
+// Note: Month is 0-indexed, so 5 = June
+const journeyStartDate = new Date(2025, 5, 6, 0, 0, 0); 
+
+function updateJourneyTimer() {
+  const now = new Date();
+  const diff = now - journeyStartDate;
+
+  if (diff > 0) {
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    document.getElementById('journey-days').textContent = String(days).padStart(3, '0');
+    document.getElementById('journey-hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('journey-minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('journey-seconds').textContent = String(seconds).padStart(2, '0');
+  }
+}
+
+// Run both timers
+setInterval(() => {
+  updateBdayTimer();
+  updateJourneyTimer();
+}, 1000);
+updateBdayTimer();
+updateJourneyTimer();
+
+/* 3. TAB SWITCHER */
 function switchTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -451,11 +492,11 @@ function switchTab(tabId) {
   event.currentTarget.classList.add('active');
 }
 
-/* 3. NIGHT NOTES & REASONS GENERATOR */
+/* 4. NIGHT NOTES & REASONS GENERATOR */
 const notes = [
   "You're almost 18! I am so incredibly proud of the person you are becoming.",
   "Close your eyes, take a deep breath. 17 was great, but 18 is going to be our best year yet.",
-  "I'm counting down every single second until that clock hits 7 PM.",
+  "I'm counting down every single second until that clock hits 10 AM.",
   "Sending you the cozy feeling of a warm blanket and a gentle forehead kiss before your big day.",
   "You're the last thing on my mind before I sleep and the absolute best part of my days."
 ];
@@ -464,7 +505,7 @@ const reasons = [
   "1. The adorable way your eyes crinkle when you laugh.",
   "2. How you always make the ordinary days feel like a celebration.",
   "3. Your kindness toward everyone around you.",
-  "4. The fact that you were born at exactly 7 PM, making the evening magical.",
+  "4. The fact that you were born at exactly 10 AM, starting the day with magic.",
   "5. Your voice—it's my favorite sound in the world.",
   "6. The way you handle everything with so much grace.",
   "7. Simply because you are Prashu, and nobody else could ever compare.",
@@ -498,7 +539,7 @@ function nextReason() {
   }, 200);
 }
 
-/* 4. CANVAS PARTICLE ENGINE (Stars, Hearts, & Birthday Magic) */
+/* 5. CANVAS PARTICLE ENGINE (Stars & Magic) */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 let width, height;
@@ -512,26 +553,21 @@ window.addEventListener('resize', resize);
 resize();
 
 class Particle {
-  constructor(symbol = null) {
-    this.reset(symbol);
-  }
-
-  reset(symbol = null) {
+  constructor() { this.reset(); }
+  reset() {
     this.x = Math.random() * width;
     this.y = height + Math.random() * 100;
     this.speed = 0.5 + Math.random() * 1.5;
     this.size = 12 + Math.random() * 14;
     this.alpha = 0.2 + Math.random() * 0.6;
-    this.symbol = symbol || ['✨', '💫', '🎂', '⭐', '🍬'][Math.floor(Math.random() * 5)];
+    this.symbol = ['✨', '💫', '🎂', '⭐', '🍬'][Math.floor(Math.random() * 5)];
     this.vx = (Math.random() - 0.5) * 1;
   }
-
   update() {
     this.y -= this.speed;
     this.x += this.vx;
     if (this.y < -50) this.reset();
   }
-
   draw() {
     ctx.globalAlpha = this.alpha;
     ctx.font = `${this.size}px sans-serif`;
@@ -545,23 +581,9 @@ for (let i = 0; i < 35; i++) {
   particles.push(p);
 }
 
-function triggerParticles(emoji) {
-  for (let i = 0; i < 20; i++) {
-    const p = new Particle(emoji);
-    p.speed = 3 + Math.random() * 4;
-    p.size = 20 + Math.random() * 20;
-    p.alpha = 1;
-    particles.push(p);
-  }
-}
-
 function animate() {
   ctx.clearRect(0, 0, width, height);
-  particles.forEach((p, index) => {
-    p.update();
-    p.draw();
-    if (p.alpha <= 0) particles.splice(index, 1);
-  });
+  particles.forEach(p => { p.update(); p.draw(); });
   requestAnimationFrame(animate);
 }
 animate();
