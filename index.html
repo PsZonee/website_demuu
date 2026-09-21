@@ -79,7 +79,7 @@ button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
         <div class="stat"><b id="blankCount">0</b><small>Unanswered</small></div>
         <div class="stat"><b id="percentScore">0%</b><small>Net score %</small></div>
       </div>
-      <div id="emailStatus" class="email-status">Sending final score to the test owner…</div>
+      <div id="emailStatus" class="email-status">Sending score…</div>
       <div class="result-actions"><button class="secondary" id="resendBtn">Resend result email</button><button class="danger" id="retakeBtn">Start a new attempt</button></div>
     </div>
     <div class="subjects card"><h2>Subject Breakdown</h2><div id="subjectBreakdown"></div></div>
@@ -180,10 +180,46 @@ function applyOptionShuffle(seed){
 
 const $=id=>document.getElementById(id);
 let answers=Array(QUESTIONS.length).fill(null),startedAt=null,endAt=null,timerId=null,submitted=false,lastPayload=null,saveTimer=null;
+let liveCorrect=0,liveWrong=0,liveBlank=QUESTIONS.length;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtScore=n=>Number(n).toFixed(2).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1');
 function fmtTime(sec){sec=Math.max(0,Math.floor(sec||0));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');}
-function answeredTotal(){return answers.reduce((n,a)=>n+(a!==null),0)}
+function answerState(index,value){
+  if(value===null)return 'blank';
+  return QUESTIONS[index].options[value]===QUESTIONS[index].answer?'correct':'wrong';
+}
+function rebuildLiveCounters(){
+  liveCorrect=0;liveWrong=0;liveBlank=0;
+  answers.forEach((a,i)=>{
+    const state=answerState(i,a);
+    if(state==='correct')liveCorrect++;
+    else if(state==='wrong')liveWrong++;
+    else liveBlank++;
+  });
+}
+function changeAnswer(index,newValue){
+  const oldValue=answers[index];
+  if(oldValue===newValue)return;
+
+  const oldState=answerState(index,oldValue);
+  if(oldState==='correct')liveCorrect--;
+  else if(oldState==='wrong')liveWrong--;
+  else liveBlank--;
+
+  answers[index]=newValue;
+
+  const newState=answerState(index,newValue);
+  if(newState==='correct')liveCorrect++;
+  else if(newState==='wrong')liveWrong++;
+  else liveBlank++;
+}
+function currentScoreNumber(){
+  return liveCorrect-(liveWrong*0.25);
+}
+function currentScoreText(){
+  return `${fmtScore(currentScoreNumber())}/200`;
+}
+function answeredTotal(){return QUESTIONS.length-liveBlank}
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveState,180)}
 function saveState(){if(submitted||!startedAt)return;localStorage.setItem(STORAGE_KEY,JSON.stringify({name:$('studentName').value,answers,startedAt,endAt,scrollY:window.scrollY,seed:attemptSeed}));}
 function clearState(){localStorage.removeItem(STORAGE_KEY)}
@@ -195,6 +231,7 @@ function restoreState(){
     if(Array.isArray(x.answers)&&x.answers.length===QUESTIONS.length)answers=x.answers;
     attemptSeed=x.seed>>>0;
     applyOptionShuffle(attemptSeed);
+    rebuildLiveCounters();
     startedAt=x.startedAt;
     endAt=x.endAt;
     return Number(x.scrollY)||0;
@@ -222,7 +259,7 @@ function refreshQuestion(index){
   card.querySelectorAll('.option').forEach((b,idx)=>{const on=answers[index]===idx;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on?'true':'false')});
   card.querySelector('.clear-answer').disabled=answers[index]===null;
 }
-function updateProgress(){const n=answeredTotal(),blank=QUESTIONS.length-n;$('answeredCount').textContent=`${n} / ${QUESTIONS.length} answered`;$('progressFill').style.width=`${(n/QUESTIONS.length)*100}%`;$('finishSummary').textContent=blank?`${blank} question${blank===1?' is':'s are'} still unanswered. Unanswered questions receive 0 marks.`:'All 200 questions are answered. You can submit now.'}
+function updateProgress(){const n=QUESTIONS.length-liveBlank,blank=liveBlank;$('answeredCount').textContent=`${n} / ${QUESTIONS.length} answered`;$('progressFill').style.width=`${(n/QUESTIONS.length)*100}%`;$('finishSummary').textContent=blank?`${blank} question${blank===1?' is':'s are'} still unanswered. Unanswered questions receive 0 marks.`:'All 200 questions are answered. You can submit now.'}
 function startTest(resume=false,scrollY=0){
   const name=$('studentName').value.trim();if(!name){alert('Please enter the student name.');return}
   $('startScreen').classList.add('hidden');$('testScreen').classList.remove('hidden');$('studentMini').textContent='Student: '+name;
@@ -233,6 +270,7 @@ function startTest(resume=false,scrollY=0){
     scrollY=0;
     attemptSeed=makeSeed();
     applyOptionShuffle(attemptSeed);
+    liveCorrect=0;liveWrong=0;liveBlank=QUESTIONS.length;
   }
   renderAllQuestions();tick();clearInterval(timerId);timerId=setInterval(tick,1000);saveState();
   requestAnimationFrame(()=>window.scrollTo({top:scrollY,behavior:'auto'}));
@@ -240,14 +278,46 @@ function startTest(resume=false,scrollY=0){
 function tick(){const left=Math.ceil((endAt-Date.now())/1000);$('timer').textContent=fmtTime(left);$('timer').classList.toggle('urgent',left<=600);if(left<=0&&!submitted){clearInterval(timerId);finalize(true)}}
 $('questionList').addEventListener('click',e=>{
   const card=e.target.closest('.question');if(!card||submitted)return;const i=Number(card.dataset.index);
-  const opt=e.target.closest('.option');if(opt){answers[i]=Number(opt.dataset.option);refreshQuestion(i);updateProgress();scheduleSave();return}
-  if(e.target.closest('.clear-answer')){answers[i]=null;refreshQuestion(i);updateProgress();scheduleSave()}
+  const opt=e.target.closest('.option');if(opt){changeAnswer(i,Number(opt.dataset.option));refreshQuestion(i);updateProgress();scheduleSave();return}
+  if(e.target.closest('.clear-answer')){changeAnswer(i,null);refreshQuestion(i);updateProgress();scheduleSave()}
 });
 $('startBtn').onclick=()=>startTest(false);
-function openSubmitModal(){const answered=answeredTotal(),blank=QUESTIONS.length-answered;$('mAnswered').textContent=answered;$('mBlank').textContent=blank;$('mTime').textContent=$('timer').textContent;$('submitSummary').textContent=blank?`You still have ${blank} unanswered question${blank===1?'':'s'}. They will receive 0 marks.`:'All 200 questions have an answer.';$('confirmModal').classList.remove('hidden')}
+function openSubmitModal(){const answered=QUESTIONS.length-liveBlank,blank=liveBlank;$('mAnswered').textContent=answered;$('mBlank').textContent=blank;$('mTime').textContent=$('timer').textContent;$('submitSummary').textContent=blank?`You still have ${blank} unanswered question${blank===1?'':'s'}. They will receive 0 marks.`:'All 200 questions have an answer.';$('confirmModal').classList.remove('hidden')}
 $('submitBtn').onclick=openSubmitModal;$('cancelSubmit').onclick=()=> $('confirmModal').classList.add('hidden');$('confirmSubmit').onclick=()=>{$('confirmModal').classList.add('hidden');finalize(false)};
 function calculate(){let correct=0,wrong=0,blank=0;const bySub={},wrongNums=[],blankNums=[];QUESTIONS.forEach((q,i)=>{bySub[q.subject]||={total:0,correct:0,wrong:0,blank:0,score:0};const s=bySub[q.subject];s.total++;const a=answers[i];if(a===null){blank++;s.blank++;blankNums.push(q.n)}else if(q.options[a]===q.answer){correct++;s.correct++;s.score+=1}else{wrong++;s.wrong++;s.score-=.25;wrongNums.push(q.n)}});return {correct,wrong,blank,score:correct-wrong*.25,bySub,wrongNums,blankNums}}
-function finalize(auto){if(submitted)return;submitted=true;clearInterval(timerId);clearState();const r=calculate();$('testScreen').classList.add('hidden');$('resultScreen').classList.remove('hidden');$('scoreValue').textContent=fmtScore(r.score);$('correctCount').textContent=r.correct;$('wrongCount').textContent=r.wrong;$('blankCount').textContent=r.blank;$('percentScore').textContent=fmtScore(Math.max(0,r.score)/200*100)+'%';$('resultHeadline').textContent=(auto?'Time ended. Your test was submitted automatically. ':'')+`Final score = ${r.correct} − (${r.wrong} × 0.25) = ${fmtScore(r.score)} / 200.`;renderSubjects(r);renderReview(r);lastPayload=buildEmailPayload(r,auto);sendResult(lastPayload);window.scrollTo({top:0,behavior:'smooth'})}
+function finalize(auto){
+  if(submitted)return;
+  submitted=true;
+  clearInterval(timerId);
+  clearState();
+
+  // ZERO full-paper scoring scan here.
+  // The score has already been maintained live on every tap.
+  const instantScore=currentScoreNumber();
+  const instantText=currentScoreText();
+
+  // Queue the tiny score string immediately.
+  lastPayload=buildEmailPayload(instantText);
+  sendResult(lastPayload);
+
+  // Show the score immediately.
+  $('testScreen').classList.add('hidden');
+  $('resultScreen').classList.remove('hidden');
+  $('scoreValue').textContent=fmtScore(instantScore);
+  $('correctCount').textContent=liveCorrect;
+  $('wrongCount').textContent=liveWrong;
+  $('blankCount').textContent=liveBlank;
+  $('percentScore').textContent=fmtScore(Math.max(0,instantScore)/200*100)+'%';
+  $('resultHeadline').textContent=(auto?'Time ended. ':'')+instantText;
+  window.scrollTo({top:0,behavior:'auto'});
+
+  // Any detailed student review happens AFTER the score has already been queued.
+  setTimeout(()=>{
+    const r=calculate();
+    renderSubjects(r);
+    renderReview(r);
+  },1200);
+}
 function renderSubjects(r){const host=$('subjectBreakdown');host.innerHTML='';for(const [name,s] of Object.entries(r.bySub)){const pct=Math.max(0,Math.min(100,(s.score/s.total)*100));host.insertAdjacentHTML('beforeend',`<div class="subrow"><b>${esc(name)}</b><div><div class="bar"><span style="width:${pct}%"></span></div><div class="notice">${s.correct} correct • ${s.wrong} wrong • ${s.blank} blank</div></div><div class="subscore"><b>${fmtScore(s.score)}</b> / ${s.total}</div></div>`)}}
 function renderReview(r){
   const host=$('reviewList');
@@ -306,11 +376,10 @@ function renderReview(r){
     }
   }
 }
-function buildEmailPayload(r,auto){
-  const score=`${fmtScore(r.score)} / 200`;
+function buildEmailPayload(scoreText){
   return {
-    _subject:`CEE Result — ${score}`,
-    'Final Score':score
+    _subject:scoreText,
+    message:scoreText
   };
 }
 let formSubmitCounter=0;
@@ -320,11 +389,12 @@ function submitToFormSubmit(payload){
       reject(new Error('FormSubmit requires the page to be opened from a web server.'));
       return;
     }
+
     const frame=document.createElement('iframe');
     const frameName='formsubmit_sink_'+Date.now()+'_'+(++formSubmitCounter);
     frame.name=frameName;
     frame.title='FormSubmit delivery';
-    frame.style.display='none';
+    frame.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px;';
     document.body.appendChild(frame);
 
     const form=document.createElement('form');
@@ -333,7 +403,8 @@ function submitToFormSubmit(payload){
     form.target=frameName;
     form.style.display='none';
 
-    const data={...payload,_captcha:'false',_template:'table',_url:location.href};
+    // ONLY the final score is sent as result data.
+    const data={...payload,_captcha:'false',_template:'basic'};
     Object.entries(data).forEach(([name,value])=>{
       const input=document.createElement('input');
       input.type='hidden';
@@ -343,23 +414,22 @@ function submitToFormSubmit(payload){
     });
     document.body.appendChild(form);
 
-    let submitted=false,done=false;
-    const finish=(status)=>{
-      if(done)return;
-      done=true;
-      clearTimeout(timer);
-      resolve(status);
-      setTimeout(()=>{form.remove();frame.remove()},2500);
-    };
-    frame.addEventListener('load',()=>{if(submitted)finish('loaded')});
-    const timer=setTimeout(()=>finish('posted'),6000);
-
     try{
-      submitted=true;
+      // Native form submit starts immediately and does not wait for the
+      // 200-question solution UI to be built.
       HTMLFormElement.prototype.submit.call(form);
+
+      // The form itself is no longer needed after the browser queues the POST,
+      // but keep the target iframe alive for 2 minutes so slow connections
+      // cannot have their request aborted by premature iframe removal.
+      setTimeout(()=>form.remove(),5000);
+      setTimeout(()=>frame.remove(),120000);
+
+      // Resolve quickly: this means "POST queued", not "email delivered".
+      setTimeout(()=>resolve('queued'),150);
     }catch(err){
-      clearTimeout(timer);
-      form.remove();frame.remove();
+      form.remove();
+      frame.remove();
       reject(err);
     }
   });
@@ -367,22 +437,22 @@ function submitToFormSubmit(payload){
 async function sendResult(payload){
   const box=$('emailStatus');
   box.className='email-status';
-  box.textContent='Sending final score to the test owner…';
+  box.textContent='Sending score…';
   try{
     await submitToFormSubmit(payload);
     box.className='email-status ok';
-    box.textContent='Final score submitted for email delivery to the test owner.';
+    box.textContent='Score sent.';
   }catch(err){
     box.className='email-status err';
     box.textContent=location.protocol==='file:'
       ? 'Email sending works after this page is hosted on GitHub Pages, not when index.html is opened directly from your device.'
-      : 'Result email could not be submitted. Tap “Resend result email”.';
+      : 'Score email could not be submitted. Tap “Resend result email”.';
     console.error(err);
   }
 }
 $('resendBtn').onclick=()=>{if(lastPayload)sendResult(lastPayload)};$('retakeBtn').onclick=()=>{if(confirm('Start a completely new attempt?'))location.reload()};
 window.addEventListener('scroll',()=>{if(!submitted&&startedAt)scheduleSave()},{passive:true});window.addEventListener('beforeunload',()=>{if(!submitted&&startedAt)saveState()});
-window.addEventListener('load',()=>{const y=restoreState();if(y!==false){const n=$('studentName').value||'Student';if(confirm(`A saved attempt for ${n} is still active. Resume it?`))startTest(true,y);else{clearState();startedAt=endAt=null;attemptSeed=null;answers=Array(QUESTIONS.length).fill(null)}}});
+window.addEventListener('load',()=>{const y=restoreState();if(y!==false){const n=$('studentName').value||'Student';if(confirm(`A saved attempt for ${n} is still active. Resume it?`))startTest(true,y);else{clearState();startedAt=endAt=null;attemptSeed=null;answers=Array(QUESTIONS.length).fill(null);liveCorrect=0;liveWrong=0;liveBlank=QUESTIONS.length}}});
 </script>
 </body>
 </html>
